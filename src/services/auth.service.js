@@ -2,45 +2,44 @@
 
 const bcrypt = require('bcryptjs');
 
-const Shop = require('../models/shop.schema');
-const KeyService = require('../services/keytoken.service');
+const User = require('../models/user.schema');
+const KeyTokenService = require('./key-token.service');
 const { createTokenPair, generateRSAKeys } = require('../utils');
 
 class AuthService {
   static async signUp({ name, email, password }) {
-    const isShopExisted = await Shop.findOne({ email }).lean();
-    if (isShopExisted) {
+    const isUserExisted = await User.findOne({ email }).lean();
+    if (isUserExisted) {
       // throw Error
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const newShop = await Shop.create({
+    const newUser = await User.create({
       name,
       email,
       password: passwordHash,
       roles: 'shop',
     });
 
-    if (!newShop) {
+    if (!newUser) {
       // throw error
     }
 
     const { publicKey, privateKey } = generateRSAKeys();
 
-    // Save publicKey to database
-    await KeyService.createKeyToken({
-      userId: newShop._id,
+    //* Save publicKey to database
+    // TODO: check error here
+    await KeyTokenService.createKeyToken({
+      userId: newUser._id,
       publicKey,
     });
 
     const tokens = await createTokenPair(
-      { userId: newShop._id },
+      { userId: newUser._id },
       publicKey,
       privateKey,
     );
-
-    console.log(tokens);
 
     return tokens;
   }

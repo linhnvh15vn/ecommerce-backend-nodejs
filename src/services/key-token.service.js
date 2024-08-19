@@ -1,6 +1,6 @@
 'use strict';
 
-const KeyToken = require('../models/keytoken.schema');
+const KeyToken = require('../models/key-token.schema');
 
 class KeyTokenService {
   static async createKeyToken({ userId, publicKey }) {
