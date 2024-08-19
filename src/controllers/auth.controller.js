@@ -4,9 +4,10 @@ const AuthService = require('../services/auth.service');
 
 class AuthController {
   async signUp(req, res, next) {
-    return {
+    return res.status(201).json({
+      status: 'success',
       data: await AuthService.signUp(req.body),
-    };
+    });
   }
 }
 

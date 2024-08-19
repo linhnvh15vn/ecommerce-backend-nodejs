@@ -1,11 +1,10 @@
 'use strict';
 
 const bcrypt = require('bcryptjs');
-const crypto = require('crypto');
 
 const Shop = require('../models/shop.schema');
 const KeyService = require('../services/keytoken.service');
-const { createTokenPair } = require('../utils');
+const { createTokenPair, generateRSAKeys } = require('../utils');
 
 class AuthService {
   static async signUp({ name, email, password }) {
@@ -23,37 +22,27 @@ class AuthService {
       roles: 'shop',
     });
 
-    if (newShop) {
-      const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
-        modulusLength: 4096,
-        publicKeyEncoding: {
-          type: 'spki',
-          format: 'pem',
-        },
-        privateKeyEncoding: {
-          type: 'pkcs8',
-          format: 'pem',
-        },
-      });
-
-      console.log({ privateKey, publicKey });
-
-      const publicKeyString = await KeyService.createKeyToken({
-        userId: newShop._id,
-        publicKey,
-      });
-
-      if (!publicKeyString) {
-      }
-
-      const tokens = await createTokenPair(
-        { userId: newShop._id },
-        publicKey,
-        privateKey,
-      );
+    if (!newShop) {
+      // throw error
     }
 
-    return {};
+    const { publicKey, privateKey } = generateRSAKeys();
+
+    // Save publicKey to database
+    await KeyService.createKeyToken({
+      userId: newShop._id,
+      publicKey,
+    });
+
+    const tokens = await createTokenPair(
+      { userId: newShop._id },
+      publicKey,
+      privateKey,
+    );
+
+    console.log(tokens);
+
+    return tokens;
   }
 }
 

@@ -4,13 +4,12 @@ const KeyToken = require('../models/keytoken.schema');
 
 class KeyTokenService {
   static async createKeyToken({ userId, publicKey }) {
-    const publicKeyString = publicKey.toString();
-    const tokens = await KeyToken.create({
+    const token = await KeyToken.create({
       user: userId,
-      publicKey: publicKeyString,
+      publicKey,
     });
 
-    return tokens ? publicKeyString : null;
+    return token ? token.publicKey : null;
   }
 }
 
