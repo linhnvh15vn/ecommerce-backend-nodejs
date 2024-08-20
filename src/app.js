@@ -26,5 +26,16 @@ require('./databases/init.mongodb');
 app.use('/', require('./routes'));
 
 // Handle errors
+app.all('*', (req, res, next) => {
+  next(new Error(`Can not find ${req.originalUrl} on this server!`, 404));
+});
+
+app.use((err, req, res, next) => {
+  const statusCode = err.status || 500;
+  return res.status(statusCode).json({
+    status: 'error',
+    message: err.messages,
+  });
+});
 
 module.exports = app;
