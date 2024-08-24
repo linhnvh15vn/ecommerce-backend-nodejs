@@ -13,7 +13,7 @@ const HEADER = {
   AUTHORIZATION: 'authorization',
 };
 
-exports.checkApiKey = async (req, res, next) => {
+const checkApiKey = async (req, res, next) => {
   try {
     const apiKeyFromHeader = req.headers[HEADER.API_KEY].toString();
     if (!apiKeyFromHeader) {
@@ -24,7 +24,6 @@ exports.checkApiKey = async (req, res, next) => {
     if (!apiKey) {
       throw new NotFound();
     }
-
     req.apiKey = apiKey;
 
     next();
@@ -33,7 +32,7 @@ exports.checkApiKey = async (req, res, next) => {
   }
 };
 
-exports.checkPermission = (permission) => {
+const checkPermission = (permission) => {
   return (req, res, next) => {
     if (!req.apiKey.permissions) {
       throw new Forbidden();
@@ -48,7 +47,7 @@ exports.checkPermission = (permission) => {
   };
 };
 
-exports.authentication = catchAsync(async (req, res, next) => {
+const authenticate = catchAsync(async (req, res, next) => {
   const userId = req.headers[HEADER.CLIENT_ID];
   if (!userId) {
     throw new Unauthorized();
@@ -77,3 +76,9 @@ exports.authentication = catchAsync(async (req, res, next) => {
     throw error;
   }
 });
+
+module.exports = {
+  checkApiKey,
+  checkPermission,
+  authenticate,
+};

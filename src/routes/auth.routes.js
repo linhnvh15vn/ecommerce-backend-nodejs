@@ -1,15 +1,16 @@
 'use strict';
 
 const express = require('express');
-const AuthController = require('../controllers/auth.controller');
-const { authentication } = require('../middlewares/auth.middleware');
+
+const authController = require('../controllers/auth.controller');
+const { authenticate } = require('../middlewares/auth.middleware');
 
 const authRouter = express.Router();
 
-authRouter.post('/sign-up', AuthController.signUp);
-authRouter.post('/log-in', AuthController.logIn);
+authRouter.post('/signup', authController.signUp);
+authRouter.post('/login', authController.logIn);
 
-authRouter.use(authentication);
-authRouter.post('/log-out', AuthController.logOut);
+authRouter.use(authenticate);
+authRouter.post('/logout', authController.logOut);
 
 module.exports = authRouter;

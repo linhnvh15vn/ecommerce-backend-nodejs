@@ -3,7 +3,10 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
-exports.createTokenPair = async (payload, publicKey, privateKey) => {
+const KeyTokenService = require('../services/key-token.service');
+const { BadRequest } = require('../core/error.response');
+
+const createTokenPair = async (payload, publicKey, privateKey) => {
   try {
     const accessToken = await jwt.sign(payload, privateKey, {
       algorithm: 'RS256',
@@ -19,7 +22,7 @@ exports.createTokenPair = async (payload, publicKey, privateKey) => {
   } catch (error) {}
 };
 
-exports.generateRSAKeys = () => {
+const generateRSAKeys = () => {
   const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
     modulusLength: 4096,
     publicKeyEncoding: {
@@ -52,6 +55,31 @@ exports.generateRSAKeys = () => {
   return { publicKey, privateKey };
 };
 
-exports.verifyJwt = async (token, keySecret) => {
+const generateKeyTokens = async (payload) => {
+  const { publicKey, privateKey } = generateRSAKeys();
+
+  const tokens = await createTokenPair(payload, publicKey, privateKey);
+  const keyStore = await KeyTokenService.createKeyToken({
+    userId: payload.userId,
+    publicKey,
+    privateKey,
+    refreshToken: tokens.refreshToken,
+  });
+
+  if (!keyStore) {
+    throw new BadRequest();
+  }
+
+  return tokens; // include AT & RT
+};
+
+const verifyJwt = async (token, keySecret) => {
   return jwt.verify(token, keySecret);
+};
+
+module.exports = {
+  createTokenPair,
+  generateRSAKeys,
+  generateKeyTokens,
+  verifyJwt,
 };

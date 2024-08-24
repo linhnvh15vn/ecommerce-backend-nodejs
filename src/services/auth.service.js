@@ -4,98 +4,62 @@ const bcrypt = require('bcryptjs');
 
 const User = require('../models/user.schema');
 const userService = require('../services/user.service');
-const KeyTokenService = require('./key-token.service');
-const { createTokenPair, generateRSAKeys, verifyJwt } = require('../utils');
+const keyTokenService = require('./key-token.service');
+const { generateKeyTokens } = require('../utils');
 const {
-  NotFound,
   Unauthorized,
   Conflict,
   BadRequest,
 } = require('../core/error.response');
 
-const generateTokens = async (payload) => {
-  const { publicKey, privateKey } = generateRSAKeys();
+const signUp = async ({ name, email, password }) => {
+  const isUserExisted = await User.findOne({ email }).lean();
+  if (isUserExisted) {
+    throw new Conflict();
+  }
 
-  const tokens = await createTokenPair(payload, publicKey, privateKey);
-
-  const keyStore = await KeyTokenService.createKeyToken({
-    userId: payload.userId,
-    publicKey,
-    privateKey,
-    refreshToken: tokens.refreshToken,
+  const passwordHash = await bcrypt.hash(password, 10);
+  const newUser = await User.create({
+    name,
+    email,
+    password: passwordHash,
+    roles: 'shop',
   });
 
-  if (!keyStore) {
+  if (!newUser) {
     throw new BadRequest();
   }
+  const tokens = await generateKeyTokens({ userId: newUser._id });
 
-  return tokens; // include AT & RT
+  return {
+    user: newUser,
+    tokens,
+  };
 };
 
-class AuthService {
-  static async signUp({ name, email, password }) {
-    const isUserExisted = await User.findOne({ email }).lean();
-    if (isUserExisted) {
-      throw new Conflict();
-    }
+const logIn = async ({ email, password, refreshToken = null }) => {
+  const user = await userService.findByEmail(email);
 
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    const newUser = await User.create({
-      name,
-      email,
-      password: passwordHash,
-      roles: 'shop',
-    });
-
-    if (!newUser) {
-      throw new BadRequest();
-    }
-
-    const tokens = await generateTokens({ userId: newUser._id });
-
-    return {
-      user: newUser,
-      tokens,
-    };
+  // TODO: Move this function to model
+  const match = bcrypt.compare(password, user.password);
+  if (!match) {
+    throw new Unauthorized();
   }
+  const tokens = await generateKeyTokens({ userId: user._id });
 
-  static logIn = async ({ email, password, refreshToken = null }) => {
-    const user = await userService.findUserByEmail(email);
-
-    // TODO: Move this function to model
-    const match = bcrypt.compare(password, user.password);
-    if (!match) {
-      throw new Unauthorized();
-    }
-
-    const tokens = await generateTokens({ userId: user._id });
-
-    console.log(tokens);
-
-    return {
-      user,
-      tokens,
-    };
+  return {
+    user,
+    tokens,
   };
+};
 
-  static logOut = async (keyStore) => {
-    const removedKey = await KeyTokenService.removeKeyById(keyStore._id);
-    console.log(removedKey);
-    return removedKey;
-  };
+const logOut = async (keyStore) => {
+  const removedKey = await keyTokenService.removeKeyById(keyStore._id);
+  return removedKey;
+};
 
-  static checkRefreshToken = async (refreshToken) => {
-    const foundedToken = await KeyTokenService.findByRefreshTokenUsed(
-      refreshToken,
-    );
-    if (foundedToken) {
-      const decodedUser = await verifyJwt(
-        refreshToken,
-        foundedToken.privateKey,
-      );
-    }
-  };
-}
-
-module.exports = AuthService;
+module.exports = {
+  signUp,
+  logIn,
+  logOut,
+};
