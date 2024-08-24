@@ -25,6 +25,18 @@ class BadRequest extends ErrorResponse {
   }
 }
 
+class Unauthorized extends ErrorResponse {
+  /**
+   *
+   */
+  constructor(
+    message = ReasonPhrases.UNAUTHORIZED,
+    statusCode = StatusCodes.UNAUTHORIZED,
+  ) {
+    super(message, statusCode);
+  }
+}
+
 class Forbidden extends ErrorResponse {
   /**
    *
@@ -49,8 +61,22 @@ class NotFound extends ErrorResponse {
   }
 }
 
+class Conflict extends ErrorResponse {
+  /**
+   *
+   */
+  constructor(
+    message = ReasonPhrases.CONFLICT,
+    statusCode = StatusCodes.CONFLICT,
+  ) {
+    super(message, statusCode);
+  }
+}
+
 module.exports = {
   BadRequest,
+  Unauthorized,
   Forbidden,
   NotFound,
+  Conflict,
 };

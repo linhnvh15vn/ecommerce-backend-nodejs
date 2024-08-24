@@ -10,29 +10,31 @@ const HEADER = {
 
 exports.checkApiKey = async (req, res, next) => {
   try {
-    const apiKey = req.headers[HEADER.API_KEY].toString();
-    if (!apiKey) {
+    const apiKeyFromHeader = req.headers[HEADER.API_KEY].toString();
+    if (!apiKeyFromHeader) {
       throw new Forbidden();
     }
 
-    const apiKeyObject = await apiKeyService.getById();
-    if (!apiKeyObject) {
+    const apiKey = await apiKeyService.findApiKey(apiKeyFromHeader);
+    if (!apiKey) {
       throw new NotFound();
     }
 
-    req.apiKeyObject = apiKeyObject;
+    req.apiKey = apiKey;
 
     next();
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 exports.checkPermission = (permission) => {
   return (req, res, next) => {
-    if (!req.apiKeyObject.permissions) {
+    if (!req.apiKey.permissions) {
       throw new Forbidden();
     }
 
-    const validPermission = req.objKey.permissions.includes(permission);
+    const validPermission = req.apiKey.permissions.includes(permission);
     if (!validPermission) {
       throw new Forbidden();
     }

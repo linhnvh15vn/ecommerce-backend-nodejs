@@ -6,14 +6,22 @@ const keyTokenSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Shop',
+      ref: 'User',
       required: true,
     },
     publicKey: {
       type: String,
       required: true,
     },
+    privateKey: {
+      type: String,
+      required: true,
+    },
     refreshToken: {
+      type: String,
+      required: true,
+    },
+    refreshTokenUsed: {
       type: Array,
       default: [],
     },

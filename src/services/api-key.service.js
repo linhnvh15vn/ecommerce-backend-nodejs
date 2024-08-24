@@ -2,7 +2,7 @@
 
 const ApiKey = require('../models/api-key.schema');
 
-exports.getById = async (key) => {
+exports.findApiKey = async (key) => {
   const apiKey = await ApiKey.findOne({
     key,
     status: true,
