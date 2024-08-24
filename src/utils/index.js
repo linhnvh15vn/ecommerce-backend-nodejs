@@ -51,3 +51,7 @@ exports.generateRSAKeys = () => {
 
   return { publicKey, privateKey };
 };
+
+exports.verifyJwt = async (token, keySecret) => {
+  return jwt.verify(token, keySecret);
+};

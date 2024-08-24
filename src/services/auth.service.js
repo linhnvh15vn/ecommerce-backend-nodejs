@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/user.schema');
 const userService = require('../services/user.service');
 const KeyTokenService = require('./key-token.service');
-const { createTokenPair, generateRSAKeys } = require('../utils');
+const { createTokenPair, generateRSAKeys, verifyJwt } = require('../utils');
 const {
   NotFound,
   Unauthorized,
@@ -77,6 +77,24 @@ class AuthService {
       user,
       tokens,
     };
+  };
+
+  static logOut = async (keyStore) => {
+    const removedKey = await KeyTokenService.removeKeyById(keyStore._id);
+    console.log(removedKey);
+    return removedKey;
+  };
+
+  static checkRefreshToken = async (refreshToken) => {
+    const foundedToken = await KeyTokenService.findByRefreshTokenUsed(
+      refreshToken,
+    );
+    if (foundedToken) {
+      const decodedUser = await verifyJwt(
+        refreshToken,
+        foundedToken.privateKey,
+      );
+    }
   };
 }
 
