@@ -1,6 +1,7 @@
 'use strict';
 
 const { default: mongoose } = require('mongoose');
+const { default: slugify } = require('slugify');
 
 // Define base product model
 const productSchema = new mongoose.Schema(
@@ -13,15 +14,14 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    product_description: {
-      type: String,
-    },
+    product_slug: String,
+    product_description: String,
     product_price: {
       type: Number,
       required: true,
     },
     product_quantity: {
-      type: String,
+      type: Number,
       required: true,
     },
     product_type: {
@@ -37,11 +37,39 @@ const productSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
       required: true,
     },
+    product_rating_average: {
+      type: Number,
+      default: 4.5,
+      min: [1, 'Rating must be above 1.0'],
+      max: [5, 'Rating must be below 5.0'],
+      set: (val) => Math.round(val * 10) / 10,
+    },
+    product_variations: {
+      type: Array,
+      default: [],
+    },
+    is_draft: {
+      type: Boolean,
+      default: true,
+      index: true,
+      select: false,
+    },
+    is_published: {
+      type: Boolean,
+      default: false,
+      index: true,
+      select: false,
+    },
   },
   {
     timestamps: true,
   },
 );
+
+productSchema.pre('save', function (next) {
+  this.product_slug = slugify(this.product_name, { lower: true });
+  next();
+});
 
 const Product = mongoose.model('Product', productSchema);
 
@@ -57,6 +85,10 @@ const clothingSchema = new mongoose.Schema(
     },
     material: {
       type: String,
+    },
+    product_shop: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
     },
   },
   {
@@ -78,6 +110,10 @@ const electronicSchema = new mongoose.Schema(
     },
     color: {
       type: String,
+    },
+    product_shop: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
     },
   },
   {

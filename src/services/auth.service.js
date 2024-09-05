@@ -18,6 +18,7 @@ const signUp = async ({ name, email, password }) => {
     throw new Conflict();
   }
 
+  // TODO move hash password to document middlewares
   const passwordHash = await bcrypt.hash(password, 10);
   const newUser = await User.create({
     name,

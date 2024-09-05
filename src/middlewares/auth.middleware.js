@@ -69,7 +69,9 @@ const authenticate = catchAsync(async (req, res, next) => {
     if (decodedUser.userId !== userId) {
       throw new Unauthorized();
     }
+
     req.keyStore = keyStore;
+    req.user = decodedUser;
 
     next();
   } catch (error) {

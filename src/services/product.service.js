@@ -7,10 +7,10 @@ class ProductFactory {
   static async createProduct(type, data) {
     switch (type) {
       case 'Electronic':
-        return new Electronic(data).createProduct();
+        return new _Electronic(data).createProduct();
 
       case 'Clothing':
-        return new Clothing(data).createProduct();
+        return new _Clothing(data).createProduct();
 
       default:
         throw new BadRequest('Invalid product type');
@@ -19,9 +19,6 @@ class ProductFactory {
 }
 
 class BaseProduct {
-  /**
-   *
-   */
   constructor({
     product_name,
     product_thumb,
@@ -42,37 +39,96 @@ class BaseProduct {
     this.product_attributes = product_attributes;
   }
 
-  async createProduct() {
-    return await Product.create(this);
+  async createProduct(product_id) {
+    return await Product.create({ ...this, _id: product_id });
   }
 }
 
-class Clothing extends BaseProduct {
+class _Clothing extends BaseProduct {
   async createProduct() {
-    const newClothing = await Clothing.create(this.product_attributes);
+    const newClothing = await Clothing.create({
+      ...this.product_attributes,
+      product_shop: this.product_shop,
+    });
     if (!newClothing) {
       throw new BadRequest();
     }
 
-    const newProduct = await super.createProduct();
+    const newProduct = await super.createProduct(newClothing._id);
     if (!newProduct) {
       throw new BadRequest();
     }
+
+    return newProduct;
   }
 }
 
-class Electronic extends BaseProduct {
+class _Electronic extends BaseProduct {
   async createProduct() {
-    const newElectronic = await Electronic.create(this.product_attributes);
+    const newElectronic = await Electronic.create({
+      ...this.product_attributes,
+      product_shop: this.product_shop,
+    });
     if (!newElectronic) {
       throw new BadRequest();
     }
 
-    const newProduct = await super.createProduct();
+    const newProduct = await super.createProduct(newElectronic._id);
     if (!newProduct) {
       throw new BadRequest();
     }
+
+    return newProduct;
   }
 }
 
-module.exports = ProductFactory;
+const findAllDraftProducts = async ({ product_shop, skip = 0, limit = 50 }) => {
+  const query = { product_shop, is_draft: true };
+
+  return await Product.find(query)
+    .populate('product_shop', '_id name email')
+    .sort({ updatedAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .lean();
+};
+
+const findAllPublishedProducts = async ({
+  product_shop,
+  skip = 0,
+  limit = 50,
+}) => {
+  const query = { product_shop, is_published: true };
+
+  return await Product.find(query)
+    .populate('product_shop', '_id name email')
+    .sort({ updatedAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .lean();
+};
+
+const publishProduct = async ({ product_shop, product_id }) => {
+  const product = await Product.findOneAndUpdate(
+    {
+      _id: product_id,
+      product_shop,
+    },
+    {
+      is_draft: false,
+      is_published: true,
+    },
+    {
+      new: true,
+    },
+  );
+
+  if (!product) return null;
+  return product;
+};
+
+module.exports = {
+  ProductFactory,
+  findAllDraftProducts,
+  findAllPublishedProducts,
+};
