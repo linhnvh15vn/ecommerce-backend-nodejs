@@ -73,6 +73,11 @@ productSchema.pre('save', function (next) {
   next();
 });
 
+productSchema.pre(/^find/, function (next) {
+  this.select('-__v');
+  next();
+});
+
 const Product = mongoose.model('Product', productSchema);
 
 // Define clothing model

@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 const apiKeyService = require('../services/api-key.service');
 const { Forbidden, NotFound, Unauthorized } = require('../core/error.response');
-const catchAsync = require('../utils/catch-async');
+const { catchAsync } = require('../utils');
 const keyTokenService = require('../services/key-token.service');
 
 const HEADER = {

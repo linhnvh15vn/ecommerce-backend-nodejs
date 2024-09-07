@@ -1,6 +1,7 @@
 'use strict';
 
 const { Product, Clothing, Electronic } = require('../models/product.schema');
+const { selectFields, excludeFields } = require('../utils');
 const { BadRequest } = require('../core/error.response');
 
 class ProductFactory {
@@ -156,6 +157,31 @@ const searchProduct = async ({ q }) => {
   return products;
 };
 
+const findAllProducts = async ({
+  limit = 50,
+  page = 1,
+  filter = { is_publish: true },
+  fields,
+}) => {
+  const skip = (page - 1) * limit;
+  const products = await Product.find(filter)
+    .sort('createdAt')
+    .skip(skip)
+    .limit(limit)
+    .select(selectFields(fields))
+    .lean();
+
+  return products;
+};
+
+const findProductById = async ({ productId, fields }) => {
+  const product = await Product.findById(productId)
+    .select(excludeFields(fields))
+    .lean();
+
+  return product;
+};
+
 module.exports = {
   ProductFactory,
   findAllDraftProducts,
@@ -163,4 +189,6 @@ module.exports = {
   publishProduct,
   unPublishProduct,
   searchProduct,
+  findAllProducts,
+  findProductById,
 };

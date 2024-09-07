@@ -55,6 +55,23 @@ const httpSearchProduct = async (req, res, next) => {
   }).send(res);
 };
 
+const httpFindAllProducts = async (req, res, next) => {
+  return new Ok({
+    data: await productService.findAllProducts({
+      filter: req.query,
+      fields: ['product_name', 'product_price', 'product_thumb'],
+    }),
+  }).send(res);
+};
+
+const httpFindProductById = async (req, res, next) => {
+  return new Ok({
+    data: await productService.findProductById({
+      productId: req.params.productId,
+    }),
+  }).send(res);
+};
+
 module.exports = {
   createProduct,
   findAllDrafts,
@@ -62,4 +79,6 @@ module.exports = {
   httpPublishProduct,
   httpUnPublishProduct,
   httpSearchProduct,
+  httpFindAllProducts,
+  httpFindProductById,
 };

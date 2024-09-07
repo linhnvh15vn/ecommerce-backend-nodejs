@@ -8,6 +8,8 @@ const { authenticate } = require('../middlewares/auth.middleware');
 const productRouter = express.Router();
 
 productRouter.get('/search', productController.httpSearchProduct);
+productRouter.get('/', productController.httpFindAllProducts);
+productRouter.get('/:productId', productController.httpFindProductById);
 
 productRouter.use(authenticate);
 
