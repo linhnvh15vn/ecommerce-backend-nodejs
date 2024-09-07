@@ -127,8 +127,40 @@ const publishProduct = async ({ product_shop, product_id }) => {
   return product;
 };
 
+const unPublishProduct = async ({ product_shop, product_id }) => {
+  const product = await Product.findOneAndUpdate(
+    {
+      _id: product_id,
+      product_shop,
+    },
+    {
+      is_draft: true,
+      is_published: false,
+    },
+    {
+      new: true,
+    },
+  );
+
+  if (!product) return null;
+  return product;
+};
+
+const searchProduct = async ({ q }) => {
+  const regexSearch = new RegExp(q);
+  const products = await Product.find({
+    is_published: true,
+    $text: { $search: regexSearch },
+  }).lean();
+
+  return products;
+};
+
 module.exports = {
   ProductFactory,
   findAllDraftProducts,
   findAllPublishedProducts,
+  publishProduct,
+  unPublishProduct,
+  searchProduct,
 };

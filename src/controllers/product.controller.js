@@ -17,7 +17,7 @@ const createProduct = async (req, res, next) => {
 
 const findAllDrafts = async (req, res, next) => {
   return new Ok({
-    data: await productService.findAllDraft({
+    data: await productService.findAllDraftProducts({
       product_shop: req.user.userId,
     }),
   }).send(res);
@@ -31,8 +31,35 @@ const findAllPublished = async (req, res, next) => {
   }).send(res);
 };
 
+const httpPublishProduct = async (req, res, next) => {
+  return new Ok({
+    data: await productService.publishProduct({
+      product_shop: req.user.userId,
+      product_id: req.params.productId,
+    }),
+  }).send(res);
+};
+
+const httpUnPublishProduct = async (req, res, next) => {
+  return new Ok({
+    data: await productService.unPublishProduct({
+      product_shop: req.user.userId,
+      product_id: req.params.productId,
+    }),
+  }).send(res);
+};
+
+const httpSearchProduct = async (req, res, next) => {
+  return new Ok({
+    data: await productService.searchProduct({ q: req.query.q }),
+  }).send(res);
+};
+
 module.exports = {
   createProduct,
   findAllDrafts,
   findAllPublished,
+  httpPublishProduct,
+  httpUnPublishProduct,
+  httpSearchProduct,
 };
