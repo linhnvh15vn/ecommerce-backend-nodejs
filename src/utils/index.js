@@ -1,9 +1,9 @@
 'use strict';
 
 const common = require('./common');
-const jwt = require('./jwt');
+const auth = require('./auth');
 
 module.exports = {
   ...common,
-  ...jwt,
+  ...auth,
 };

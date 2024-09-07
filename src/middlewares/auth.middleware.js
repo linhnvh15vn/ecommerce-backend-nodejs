@@ -47,7 +47,7 @@ const checkPermission = (permission) => {
   };
 };
 
-const authenticate = catchAsync(async (req, res, next) => {
+const authenticate = async (req, res, next) => {
   const userId = req.headers[HEADER.CLIENT_ID];
   if (!userId) {
     throw new Unauthorized();
@@ -77,7 +77,7 @@ const authenticate = catchAsync(async (req, res, next) => {
   } catch (error) {
     throw error;
   }
-});
+};
 
 module.exports = {
   checkApiKey,
