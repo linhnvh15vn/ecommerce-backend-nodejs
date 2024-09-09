@@ -12,6 +12,16 @@ const findApiKey = async (key) => {
   return apiKey;
 };
 
+const createApiKey = async () => {
+  const newApiKey = await ApiKey.create({
+    key: 'test-api-key',
+    permissions: ['0000'],
+  });
+
+  return newApiKey;
+};
+
 module.exports = {
   findApiKey,
+  createApiKey,
 };

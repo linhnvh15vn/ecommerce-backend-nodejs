@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 const apiKeyService = require('../services/api-key.service');
 const { Forbidden, NotFound, Unauthorized } = require('../core/error.response');
-const catchAsync = require('../utils/catch-async');
+const { catchAsync } = require('../utils');
 const keyTokenService = require('../services/key-token.service');
 
 const HEADER = {
@@ -47,7 +47,7 @@ const checkPermission = (permission) => {
   };
 };
 
-const authenticate = catchAsync(async (req, res, next) => {
+const authenticate = async (req, res, next) => {
   const userId = req.headers[HEADER.CLIENT_ID];
   if (!userId) {
     throw new Unauthorized();
@@ -69,13 +69,15 @@ const authenticate = catchAsync(async (req, res, next) => {
     if (decodedUser.userId !== userId) {
       throw new Unauthorized();
     }
+
     req.keyStore = keyStore;
+    req.user = decodedUser;
 
     next();
   } catch (error) {
     throw error;
   }
-});
+};
 
 module.exports = {
   checkApiKey,
