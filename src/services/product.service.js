@@ -4,7 +4,7 @@ const { Product } = require('../models/product.schema');
 const ProductFactory = require('../factories/product.factory');
 const { selectFields, excludeFields } = require('../utils');
 
-const createProduct = async (data) => {
+const createProduct = async (type, data) => {
   return await ProductFactory.createProduct(type, data);
 };
 

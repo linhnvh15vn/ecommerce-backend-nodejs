@@ -3,6 +3,7 @@
 const { Product, Clothing, Electronic } = require('../models/product.schema');
 const { BadRequest } = require('../core/error.response');
 const { cleanObject, cleanNestedObject } = require('../utils');
+const InventoryRepository = require('../models/repositories/inventory.repository');
 
 class ProductFactory {
   static async createProduct(type, body) {
@@ -54,7 +55,18 @@ class _Product {
   }
 
   async createProduct(product_id) {
-    return await Product.create({ ...this, _id: product_id });
+    const newProduct = await Product.create({ ...this, _id: product_id });
+    if (!newProduct) {
+      // throw error
+    }
+
+    await InventoryRepository.createInventory({
+      productId: newProduct._id,
+      shopId: this.product_shop,
+      stock: this.product_quantity,
+    });
+
+    return newProduct;
   }
 
   async updateProduct(product_id) {
