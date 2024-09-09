@@ -14,6 +14,7 @@ productRouter.get('/', productController.httpFindAllProducts);
 productRouter.use(authenticate);
 
 productRouter.post('/', productController.createProduct);
+productRouter.patch('/:productId', productController.httpUpdateProduct);
 productRouter.get('/drafts', productController.findAllDrafts);
 productRouter.get('/published', productController.findAllPublished);
 

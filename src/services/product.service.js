@@ -4,8 +4,13 @@ const { Product } = require('../models/product.schema');
 const ProductFactory = require('../factories/product.factory');
 const { selectFields, excludeFields } = require('../utils');
 
-const createProduct = async (type, data) => {
+const createProduct = async (data) => {
   return await ProductFactory.createProduct(type, data);
+};
+
+const updateProduct = async (body) => {
+  const productType = (await Product.findById(body.product_id)).product_type;
+  return await ProductFactory.updateProduct(productType, body);
 };
 
 const findAllDraftProducts = async ({ product_shop, skip = 0, limit = 50 }) => {
@@ -116,4 +121,5 @@ module.exports = {
   searchProduct,
   findAllProducts,
   findProductById,
+  updateProduct,
 };

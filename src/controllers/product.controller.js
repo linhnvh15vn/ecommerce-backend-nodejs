@@ -70,6 +70,16 @@ const httpFindProductById = async (req, res, next) => {
   }).send(res);
 };
 
+const httpUpdateProduct = catchAsync(async (req, res, next) => {
+  return new Ok({
+    data: await productService.updateProduct({
+      ...req.body,
+      product_id: req.params.productId,
+      product_shop: req.user.userId,
+    }),
+  }).send(res);
+});
+
 module.exports = {
   createProduct,
   findAllDrafts,
@@ -79,4 +89,5 @@ module.exports = {
   httpSearchProduct,
   httpFindAllProducts,
   httpFindProductById,
+  httpUpdateProduct,
 };
