@@ -2,124 +2,86 @@
 
 const { Product } = require('../models/product.schema');
 const ProductFactory = require('../factories/product.factory');
+const ProductRepository = require('../models/repositories/product.repository');
 const { selectFields, excludeFields } = require('../utils');
 
-const createProduct = async (data) => {
-  return await ProductFactory.createProduct(type, data);
-};
+class ProductService {
+  static async findAllProducts({ query, skip = 0, limit = 50 }) {
+    const filter = { ...query, is_publish: true };
+    const select = ['product_name', 'product_price', 'product_thumb'];
 
-const updateProduct = async (body) => {
-  const productType = (await Product.findById(body.product_id)).product_type;
-  return await ProductFactory.updateProduct(productType, body);
-};
+    return await ProductRepository.findAllProducts({
+      query: filter,
+      skip,
+      limit,
+      select,
+    });
+  }
 
-const findAllDraftProducts = async ({ product_shop, skip = 0, limit = 50 }) => {
-  const query = { product_shop, is_draft: true };
+  static async findProductById(productId) {
+    const nonSelect = [];
+    return await ProductRepository.findProductById({ productId, nonSelect });
+  }
 
-  return await Product.find(query)
-    .populate('product_shop', '_id name email')
-    .sort({ updatedAt: -1 })
-    .skip(skip)
-    .limit(limit)
-    .lean();
-};
+  static async findAllDraftProducts({ product_shop, skip = 0, limit = 50 }) {
+    const query = { product_shop, is_draft: true };
+    const products = await ProductRepository.findAllProducts({
+      query,
+      skip,
+      limit,
+    });
 
-const findAllPublishedProducts = async ({
-  product_shop,
-  skip = 0,
-  limit = 50,
-}) => {
-  const query = { product_shop, is_published: true };
+    return products;
+  }
 
-  return await Product.find(query)
-    .populate('product_shop', '_id name email')
-    .sort({ updatedAt: -1 })
-    .skip(skip)
-    .limit(limit)
-    .lean();
-};
+  static async findAllPublishedProducts({
+    product_shop,
+    skip = 0,
+    limit = 50,
+  }) {
+    const query = { product_shop, is_published: true };
+    const products = await ProductRepository.findAllProducts({
+      query,
+      skip,
+      limit,
+    });
 
-const publishProduct = async ({ product_shop, product_id }) => {
-  const product = await Product.findOneAndUpdate(
-    {
-      _id: product_id,
-      product_shop,
-    },
-    {
-      is_draft: false,
-      is_published: true,
-    },
-    {
-      new: true,
-    },
-  );
+    return products;
+  }
 
-  if (!product) return null;
-  return product;
-};
+  static async createProduct(body) {
+    const newProduct = await ProductFactory.createProduct(type, body);
+    return newProduct;
+  }
 
-const unPublishProduct = async ({ product_shop, product_id }) => {
-  const product = await Product.findOneAndUpdate(
-    {
-      _id: product_id,
-      product_shop,
-    },
-    {
-      is_draft: true,
-      is_published: false,
-    },
-    {
-      new: true,
-    },
-  );
+  static async updateProduct(body) {
+    const productType = (await Product.findById(body.product_id)).product_type;
+    return await ProductFactory.updateProduct(productType, body);
+  }
 
-  if (!product) return null;
-  return product;
-};
+  static async searchProduct(q) {
+    return await ProductRepository.searchProduct(q);
+  }
 
-const searchProduct = async ({ q }) => {
-  const regexSearch = new RegExp(q);
-  const products = await Product.find({
-    is_published: true,
-    $text: { $search: regexSearch },
-  }).lean();
+  static async publishProduct({ productId, productShopId }) {
+    const body = { is_draft: false, is_published: true };
 
-  return products;
-};
+    return await ProductRepository.findOneAndUpdate({
+      productId,
+      productShopId,
+      body,
+    });
+  }
 
-const findAllProducts = async ({
-  limit = 50,
-  page = 1,
-  filter = { is_publish: true },
-  fields,
-}) => {
-  const skip = (page - 1) * limit;
-  const products = await Product.find(filter)
-    .sort('createdAt')
-    .skip(skip)
-    .limit(limit)
-    .select(selectFields(fields))
-    .lean();
+  static async unPublishProduct({ productId, productShopId }) {
+    const body = { is_draft: true, is_published: false };
 
-  return products;
-};
+    return await ProductRepository.findOneAndUpdate({
+      productId,
+      productShopId,
+      body,
+    });
+  }
+}
 
-const findProductById = async ({ productId, fields }) => {
-  const product = await Product.findById(productId)
-    .select(excludeFields(fields))
-    .lean();
-
-  return product;
-};
-
-module.exports = {
-  createProduct,
-  findAllDraftProducts,
-  findAllPublishedProducts,
-  publishProduct,
-  unPublishProduct,
-  searchProduct,
-  findAllProducts,
-  findProductById,
-  updateProduct,
-};
+module.exports = ProductService;
