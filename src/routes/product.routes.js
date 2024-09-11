@@ -9,7 +9,7 @@ const productRouter = express.Router();
 
 productRouter.get('/search', ProductController.searchProduct);
 productRouter.get('/', ProductController.findAllProducts);
-// productRouter.get('/:productId', ProductController.httpFindProductById);
+// productRouter.get('/:productId', ProductController.findProductById);
 
 productRouter.use(authenticate);
 

@@ -25,6 +25,8 @@ class ProductController {
 
   /* GET - Find all published product - OK */
   findAllPublished = catchAsync(async (req, res, next) => {
+    console.log('a');
+
     return new Ok({
       data: await ProductService.findAllPublishedProducts({
         product_shop: req.user.userId,
@@ -57,7 +59,7 @@ class ProductController {
     }).send(res);
   });
 
-  /* GET - Find all products */
+  /* GET - Find all products - OK */
   findAllProducts = catchAsync(async (req, res, next) => {
     return new Ok({
       data: await ProductService.findAllProducts({
@@ -66,7 +68,7 @@ class ProductController {
     }).send(res);
   });
 
-  /* GET - Find product by productId */
+  /* GET - Find product by productId - OK */
   findProductById = catchAsync(async (req, res, next) => {
     return new Ok({
       data: await ProductService.findProductById(req.params.productId),

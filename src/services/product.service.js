@@ -6,14 +6,12 @@ const ProductRepository = require('../models/repositories/product.repository');
 const { selectFields, excludeFields } = require('../utils');
 
 class ProductService {
-  static async findAllProducts({ query, skip = 0, limit = 50 }) {
-    const filter = { ...query, is_publish: true };
+  static async findAllProducts({ query }) {
+    const filter = { ...query, is_published: true };
     const select = ['product_name', 'product_price', 'product_thumb'];
 
     return await ProductRepository.findAllProducts({
-      query: filter,
-      skip,
-      limit,
+      filter,
       select,
     });
   }
@@ -39,6 +37,8 @@ class ProductService {
     skip = 0,
     limit = 50,
   }) {
+    console.log('a');
+
     const query = { product_shop, is_published: true };
     const products = await ProductRepository.findAllProducts({
       query,

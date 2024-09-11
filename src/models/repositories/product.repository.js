@@ -1,17 +1,36 @@
 'use strict';
 
 const { excludeFields, selectFields } = require('../../utils');
+const { ITEMS_PER_PAGE } = require('../../constants');
 const { Product } = require('../product.schema');
 
 class ProductRepository {
-  static async findAllProducts({ query, limit, skip, select }) {
-    return await Product.find(query)
+  static async findAllProducts({
+    filter,
+    page = 1,
+    itemsPerPage = ITEMS_PER_PAGE,
+    select,
+  }) {
+    const skip = (page - 1) * itemsPerPage;
+
+    const items = await Product.find(filter)
       .populate('product_shop', '_id name email')
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit)
+      .limit(itemsPerPage)
       .select(select && selectFields(select))
       .lean();
+    const currentItemCount = items.length;
+    const totalItems = await Product.countDocuments(filter);
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    return {
+      currentItemCount,
+      itemsPerPage,
+      totalItems,
+      totalPages,
+      items,
+    };
   }
 
   static async findProductById({ productId, nonSelect }) {
