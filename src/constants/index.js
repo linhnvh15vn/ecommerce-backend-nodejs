@@ -1,5 +1,5 @@
-const EXAMPLE = 'EXAMPLE';
+const common = require('./common');
 
 module.exports = {
-  EXAMPLE,
+  ...common,
 };

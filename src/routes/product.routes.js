@@ -2,26 +2,23 @@
 
 const express = require('express');
 
-const productController = require('../controllers/product.controller');
+const ProductController = require('../controllers/product.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
 
 const productRouter = express.Router();
 
-productRouter.get('/search', productController.httpSearchProduct);
-productRouter.get('/', productController.httpFindAllProducts);
-// productRouter.get('/:productId', productController.httpFindProductById);
+productRouter.get('/search', ProductController.searchProduct);
+productRouter.get('/', ProductController.findAllProducts);
+// productRouter.get('/:productId', ProductController.findProductById);
 
 productRouter.use(authenticate);
 
-productRouter.post('/', productController.createProduct);
-productRouter.patch('/:productId', productController.httpUpdateProduct);
-productRouter.get('/drafts', productController.findAllDrafts);
-productRouter.get('/published', productController.findAllPublished);
+productRouter.post('/', ProductController.createProduct);
+productRouter.patch('/:productId', ProductController.updateProduct);
+productRouter.get('/drafts', ProductController.findAllDrafts);
+productRouter.get('/published', ProductController.findAllPublished);
 
-productRouter.post('/publish/:productId', productController.httpPublishProduct);
-productRouter.post(
-  '/unpublish/:productId',
-  productController.httpUnPublishProduct,
-);
+productRouter.post('/publish/:productId', ProductController.publishProduct);
+productRouter.post('/unpublish/:productId', ProductController.unPublishProduct);
 
 module.exports = productRouter;
