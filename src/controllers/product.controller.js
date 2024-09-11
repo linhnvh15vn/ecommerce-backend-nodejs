@@ -1,93 +1,90 @@
 'use strict';
 
-const productService = require('../services/product.service');
+const ProductService = require('../services/product.service');
 const { Created, Ok } = require('../core/success.response');
 const { catchAsync } = require('../utils');
 
-const createProduct = catchAsync(async (req, res, next) => {
-  return new Created({
-    data: await productService.createProduct(req.body.product_type, {
-      product_shop: req.user.userId,
-      ...req.body,
-    }),
-  }).send(res);
-});
+class ProductController {
+  createProduct = catchAsync(async (req, res, next) => {
+    return new Created({
+      data: await ProductService.createProduct(req.body.product_type, {
+        product_shop: req.user.userId,
+        ...req.body,
+      }),
+    }).send(res);
+  });
 
-const findAllDrafts = async (req, res, next) => {
-  return new Ok({
-    data: await productService.findAllDraftProducts({
-      product_shop: req.user.userId,
-    }),
-  }).send(res);
-};
+  /* GET - Find all draft product - OK */
+  findAllDrafts = catchAsync(async (req, res, next) => {
+    return new Ok({
+      data: await ProductService.findAllDraftProducts({
+        product_shop: req.user.userId,
+      }),
+    }).send(res);
+  });
 
-const findAllPublished = async (req, res, next) => {
-  return new Ok({
-    data: await productService.findAllPublishedProducts({
-      product_shop: req.user.userId,
-    }),
-  }).send(res);
-};
+  /* GET - Find all published product - OK */
+  findAllPublished = catchAsync(async (req, res, next) => {
+    console.log('a');
 
-const httpPublishProduct = async (req, res, next) => {
-  return new Ok({
-    data: await productService.publishProduct({
-      product_shop: req.user.userId,
-      product_id: req.params.productId,
-    }),
-  }).send(res);
-};
+    return new Ok({
+      data: await ProductService.findAllPublishedProducts({
+        product_shop: req.user.userId,
+      }),
+    }).send(res);
+  });
 
-const httpUnPublishProduct = async (req, res, next) => {
-  return new Ok({
-    data: await productService.unPublishProduct({
-      product_shop: req.user.userId,
-      product_id: req.params.productId,
-    }),
-  }).send(res);
-};
+  publishProduct = catchAsync(async (req, res, next) => {
+    return new Ok({
+      data: await ProductService.publishProduct({
+        product_shop: req.user.userId,
+        product_id: req.params.productId,
+      }),
+    }).send(res);
+  });
 
-const httpSearchProduct = async (req, res, next) => {
-  return new Ok({
-    data: await productService.searchProduct({ q: req.query.q }),
-  }).send(res);
-};
+  unPublishProduct = catchAsync(async (req, res, next) => {
+    return new Ok({
+      data: await ProductService.unPublishProduct({
+        product_shop: req.user.userId,
+        product_id: req.params.productId,
+      }),
+    }).send(res);
+  });
 
-const httpFindAllProducts = async (req, res, next) => {
-  return new Ok({
-    data: await productService.findAllProducts({
-      filter: req.query,
-      fields: ['product_name', 'product_price', 'product_thumb'],
-    }),
-  }).send(res);
-};
+  /* GET - Search product - OK */
+  searchProduct = catchAsync(async (req, res, next) => {
+    return new Ok({
+      data: await ProductService.searchProduct(req.query.q),
+    }).send(res);
+  });
 
-const httpFindProductById = async (req, res, next) => {
-  return new Ok({
-    data: await productService.findProductById({
-      productId: req.params.productId,
-    }),
-  }).send(res);
-};
+  /* GET - Find all products - OK */
+  findAllProducts = catchAsync(async (req, res, next) => {
+    return new Ok({
+      data: await ProductService.findAllProducts({
+        query: req.query,
+      }),
+    }).send(res);
+  });
 
-const httpUpdateProduct = catchAsync(async (req, res, next) => {
-  return new Ok({
-    data: await productService.updateProduct({
-      ...req.body,
-      product_id: req.params.productId,
-      product_shop: req.user.userId,
-    }),
-  }).send(res);
-});
+  /* GET - Find product by productId - OK */
+  findProductById = catchAsync(async (req, res, next) => {
+    return new Ok({
+      data: await ProductService.findProductById(req.params.productId),
+    }).send(res);
+  });
 
-module.exports = {
-  createProduct,
-  findAllDrafts,
-  findAllPublished,
-  httpPublishProduct,
-  httpUnPublishProduct,
-  httpSearchProduct,
-  httpFindAllProducts,
-  httpFindProductById,
-  httpUpdateProduct,
-};
+  /* PATCH - Update product */
+  updateProduct = catchAsync(async (req, res, next) => {
+    return new Ok({
+      data: await ProductService.updateProduct({
+        ...req.body,
+        product_id: req.params.productId,
+        product_shop: req.user.userId,
+      }),
+    }).send(res);
+  });
+}
+
+module.exports = new ProductController();
