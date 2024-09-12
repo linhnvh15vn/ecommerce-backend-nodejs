@@ -22,7 +22,7 @@ const checkApiKey = async (req, res, next) => {
 
     const apiKey = await apiKeyService.findApiKey(apiKeyFromHeader);
     if (!apiKey) {
-      throw new NotFound();
+      throw new NotFound('');
     }
     req.apiKey = apiKey;
 
@@ -47,15 +47,15 @@ const checkPermission = (permission) => {
   };
 };
 
-const authenticate = async (req, res, next) => {
+const authenticate = catchAsync(async (req, res, next) => {
   const userId = req.headers[HEADER.CLIENT_ID];
   if (!userId) {
-    throw new Unauthorized();
+    throw new Unauthorized('You are missing x-client-id from header.');
   }
 
   const keyStore = await keyTokenService.findByUserId(userId);
   if (!keyStore) {
-    throw new NotFound();
+    throw new NotFound('No user found with this x-client-id.');
   }
 
   const accessToken = req.headers[HEADER.AUTHORIZATION];
@@ -63,21 +63,18 @@ const authenticate = async (req, res, next) => {
     throw new Unauthorized();
   }
 
-  try {
-    const decodedUser = jwt.verify(accessToken, keyStore.publicKey);
+  // catch jwt error
+  const decodedUser = jwt.verify(accessToken, keyStore.publicKey);
 
-    if (decodedUser.userId !== userId) {
-      throw new Unauthorized();
-    }
-
-    req.keyStore = keyStore;
-    req.user = decodedUser;
-
-    next();
-  } catch (error) {
-    throw error;
+  if (decodedUser.userId !== userId) {
+    throw new Unauthorized();
   }
-};
+
+  req.keyStore = keyStore;
+  req.user = decodedUser;
+
+  next();
+});
 
 module.exports = {
   checkApiKey,
