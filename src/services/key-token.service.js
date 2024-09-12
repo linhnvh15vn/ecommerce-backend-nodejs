@@ -25,10 +25,6 @@ const createKeyToken = async ({
 
 const findByUserId = async (userId) => {
   const keyToken = await KeyToken.findOne({ user: userId }).lean();
-  if (!keyToken) {
-    throw new NotFound();
-  }
-
   return keyToken;
 };
 
