@@ -1,10 +1,13 @@
 'use strict';
 
 const express = require('express');
+
 const authRouter = require('./auth.routes');
-const authMiddleware = require('../middlewares/auth.middleware');
 const productRouter = require('./product.routes');
 const discountRouter = require('./discount.routes');
+const cartRouter = require('./cart.routes');
+
+const authMiddleware = require('../middlewares/auth.middleware');
 
 const { createApiKey } = require('../services/api-key.service');
 
@@ -16,6 +19,7 @@ router.use(authMiddleware.checkPermission('0000'));
 router.use('/api/v1/auth', authRouter);
 router.use('/api/v1/products', productRouter);
 router.use('/api/v1/discounts', discountRouter);
+router.use('/api/v1/cart', cartRouter);
 
 // TEST ROUTER
 /*

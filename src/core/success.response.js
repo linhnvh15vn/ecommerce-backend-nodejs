@@ -26,8 +26,8 @@ class Ok extends SuccessResponse {
   /**
    *
    */
-  constructor(message, statusCode) {
-    super(message, statusCode);
+  constructor(message, statusCode, data) {
+    super(message, statusCode, data);
   }
 }
 
