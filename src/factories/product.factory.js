@@ -33,32 +33,16 @@ class ProductFactory {
 }
 
 class _Product {
-  constructor({
-    product_name,
-    product_thumb,
-    product_description,
-    product_price,
-    product_quantity,
-    product_type,
-    product_shop,
-    product_attributes,
-  }) {
-    this.product_name = product_name;
-    this.product_thumb = product_thumb;
-    this.product_description = product_description;
-    this.product_price = product_price;
-    this.product_quantity = product_quantity;
-    this.product_type = product_type;
-    this.product_shop = product_shop;
-    this.product_attributes = product_attributes;
+  constructor(body) {
+    this.body = body;
   }
 
-  async createProduct(product_id) {
-    return await Product.create({ ...this, _id: product_id });
+  async createProduct(_id) {
+    return await Product.create({ _id, ...this.body });
   }
 
-  async updateProduct(product_id) {
-    return await Product.findByIdAndUpdate(product_id, this, {
+  async updateProduct(_id) {
+    return await Product.findByIdAndUpdate(_id, this, {
       new: true,
     });
   }
@@ -66,22 +50,19 @@ class _Product {
 
 class _Clothing extends _Product {
   async createProduct() {
-    const newClothing = await Clothing.create({
-      ...this.product_attributes,
-      product_shop: this.product_shop,
-    });
-    if (!newClothing) {
-      throw new BadRequest();
-    }
+    const { shop_id, attributes } = this.body;
+    const body = { shop_id, ...attributes };
+
+    const newClothing = await Clothing.create(body);
+    if (!newClothing) throw new BadRequest();
 
     const newProduct = await super.createProduct(newClothing._id);
-    if (!newProduct) {
-      throw new BadRequest();
-    }
+    if (!newProduct) throw new BadRequest();
 
     return newProduct;
   }
 
+  // TODO: FIX LATER !!!!!!
   async updateProduct(productId) {
     const objParams = cleanObject(this);
 
@@ -95,8 +76,6 @@ class _Clothing extends _Product {
       );
     }
 
-    console.log(cleanNestedObject(objParams));
-
     const updatedProduct = await super.updateProduct(
       productId,
       cleanNestedObject(objParams),
@@ -107,10 +86,10 @@ class _Clothing extends _Product {
 
 class _Electronic extends _Product {
   async createProduct() {
-    const newElectronic = await Electronic.create({
-      ...this.product_attributes,
-      product_shop: this.product_shop,
-    });
+    const { shop_id, attributes } = this.body;
+    const body = { shop_id, ...attributes };
+
+    const newElectronic = await Electronic.create(body);
     if (!newElectronic) {
       throw new BadRequest();
     }
@@ -123,6 +102,7 @@ class _Electronic extends _Product {
     return newProduct;
   }
 
+  // TODO: FIX LATER !!!!!!1
   async updateProduct(productId) {
     const objParams = this;
     if (objParams.product_attributes) {

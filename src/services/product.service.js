@@ -8,7 +8,7 @@ const { selectFields, excludeFields } = require('../utils');
 class ProductService {
   static async findAllProducts({ query }) {
     const filter = { ...query, is_published: true };
-    const select = ['product_name', 'product_price', 'product_thumb'];
+    const select = ['name', 'price', 'thumb'];
 
     return await ProductRepository.findAllProducts({
       filter,
@@ -21,8 +21,8 @@ class ProductService {
     return await ProductRepository.findProductById({ productId, nonSelect });
   }
 
-  static async findAllDraftProducts({ product_shop, skip = 0, limit = 50 }) {
-    const query = { product_shop, is_draft: true };
+  static async findAllDraftProducts({ shopId, skip = 0, limit = 50 }) {
+    const query = { shop_id: shopId, is_draft: true };
     const products = await ProductRepository.findAllProducts({
       query,
       skip,
@@ -32,14 +32,8 @@ class ProductService {
     return products;
   }
 
-  static async findAllPublishedProducts({
-    product_shop,
-    skip = 0,
-    limit = 50,
-  }) {
-    console.log('a');
-
-    const query = { product_shop, is_published: true };
+  static async findAllPublishedProducts({ shopId, skip = 0, limit = 50 }) {
+    const query = { shop_id: shopId, is_published: true };
     const products = await ProductRepository.findAllProducts({
       query,
       skip,

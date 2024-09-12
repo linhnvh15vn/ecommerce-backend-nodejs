@@ -14,12 +14,13 @@ class ProductRepository {
     const skip = (page - 1) * itemsPerPage;
 
     const items = await Product.find(filter)
-      .populate('product_shop', '_id name email')
+      .populate('shop_id', '_id name email')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(itemsPerPage)
       .select(select && selectFields(select))
       .lean();
+
     const currentItemCount = items.length;
     const totalItems = await Product.countDocuments(filter);
     const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -40,7 +41,7 @@ class ProductRepository {
   }
 
   static async findOneAndUpdate({ productId, productShopId, body }) {
-    const query = { _id: productId, product_shop: productShopId };
+    const query = { _id: productId, shop_id: productShopId };
     const product = await Product.findOneAndUpdate(query, body, {
       new: true,
     });
@@ -51,10 +52,10 @@ class ProductRepository {
   }
 
   static async searchProduct(q) {
-    const regexSearch = new RegExp(q);
+    const regQ = new RegExp(q);
     const products = await Product.find({
       is_published: true,
-      $text: { $search: regexSearch },
+      $text: { $search: regQ },
     }).lean();
 
     return products;
