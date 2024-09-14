@@ -2,82 +2,75 @@
 
 const jwt = require('jsonwebtoken');
 
-const apiKeyService = require('../services/api-key.service');
+const ApiKeyService = require('../services/api-key.service');
+const KeyTokenService = require('../services/key-token.service');
 const { Forbidden, NotFound, Unauthorized } = require('../core/error.response');
 const { catchAsync } = require('../utils');
-const keyTokenService = require('../services/key-token.service');
 
-const HEADER = {
-  API_KEY: 'x-api-key',
-  CLIENT_ID: 'x-client-id',
-  AUTHORIZATION: 'authorization',
-};
+class AuthMiddleware {
+  static checkApiKey = catchAsync(async (req, res, next) => {
+    try {
+      const xApiKey = req.headers['x-api-key'].toString();
+      if (!xApiKey) {
+        throw new Forbidden();
+      }
 
-const checkApiKey = async (req, res, next) => {
-  try {
-    const apiKeyFromHeader = req.headers[HEADER.API_KEY].toString();
-    if (!apiKeyFromHeader) {
-      throw new Forbidden();
+      const apiKey = await ApiKeyService.findByKey(xApiKey);
+      if (!apiKey) {
+        throw new NotFound('This api key does not existed.');
+      }
+
+      req.apiKey = apiKey;
+
+      next();
+    } catch (error) {
+      console.log(error);
     }
+  });
 
-    const apiKey = await apiKeyService.findApiKey(apiKeyFromHeader);
-    if (!apiKey) {
-      throw new NotFound('');
-    }
-    req.apiKey = apiKey;
+  static checkPermission = (permission) => {
+    return (req, res, next) => {
+      if (!req.apiKey.permissions) {
+        throw new Forbidden();
+      }
 
-    next();
-  } catch (error) {
-    console.log(error);
-  }
-};
+      const validPermission = req.apiKey.permissions.includes(permission);
+      if (!validPermission) {
+        throw new Forbidden();
+      }
 
-const checkPermission = (permission) => {
-  return (req, res, next) => {
-    if (!req.apiKey.permissions) {
-      throw new Forbidden();
-    }
-
-    const validPermission = req.apiKey.permissions.includes(permission);
-    if (!validPermission) {
-      throw new Forbidden();
-    }
-
-    next();
+      next();
+    };
   };
-};
 
-const authenticate = catchAsync(async (req, res, next) => {
-  const userId = req.headers[HEADER.CLIENT_ID];
-  if (!userId) {
-    throw new Unauthorized('You are missing x-client-id from header.');
-  }
+  static authenticate = catchAsync(async (req, res, next) => {
+    const userId = req.headers['x-client-id'];
+    if (!userId) {
+      throw new Unauthorized('You are not logged in.');
+    }
 
-  const keyStore = await keyTokenService.findByUserId(userId);
-  if (!keyStore) {
-    throw new NotFound('No user found with this x-client-id.');
-  }
+    const keyStore = await KeyTokenService.findByUserId(userId);
+    if (!keyStore) {
+      throw new NotFound('No user found with this _id');
+    }
 
-  const accessToken = req.headers[HEADER.AUTHORIZATION];
-  if (!accessToken) {
-    throw new Unauthorized();
-  }
+    const accessToken = req.headers['authorization'];
+    if (!accessToken) {
+      throw new Unauthorized();
+    }
 
-  // catch jwt error
-  const decodedUser = jwt.verify(accessToken, keyStore.publicKey);
+    // catch jwt error
+    const decodedUser = jwt.verify(accessToken, keyStore.publicKey);
 
-  if (decodedUser.userId !== userId) {
-    throw new Unauthorized();
-  }
+    if (decodedUser.userId !== userId) {
+      throw new Unauthorized();
+    }
 
-  req.keyStore = keyStore;
-  req.user = decodedUser;
+    req.keyStore = keyStore;
+    req.user = decodedUser;
 
-  next();
-});
+    next();
+  });
+}
 
-module.exports = {
-  checkApiKey,
-  checkPermission,
-  authenticate,
-};
+module.exports = AuthMiddleware;

@@ -1,54 +1,24 @@
 'use strict';
 
-const KeyToken = require('../models/key-token.schema');
 const { NotFound } = require('../core/error.response');
+const KeyTokenRepository = require('../models/repositories/key-token.repository');
 
-const createKeyToken = async ({
-  userId,
-  publicKey,
-  privateKey,
-  refreshToken,
-}) => {
-  const token = await KeyToken.findOneAndUpdate(
-    { user: userId },
-    {
-      publicKey,
-      privateKey,
-      refreshTokenUsed: [],
-      refreshToken,
-    },
-    { upsert: true, new: true },
-  );
+class KeyTokenService {
+  static async createKeyToken(body) {
+    const filter = { userId: body.userId };
+    const token = await KeyTokenRepository.findOneAndUpdate(filter, body);
 
-  return token ? token.publicKey : null;
-};
-
-const findByUserId = async (userId) => {
-  const keyToken = await KeyToken.findOne({ user: userId }).lean();
-  return keyToken;
-};
-
-const removeById = async (_id) => {
-  const keyToken = await KeyToken.findByIdAndDelete(_id);
-  if (!keyToken) {
-    throw new NotFound();
+    return token ? token.publicKey : null;
   }
 
-  return keyToken;
-};
+  static async findByUserId(userId) {
+    const keyToken = await KeyTokenRepository.findOne({ filter: { userId } });
+    if (!keyToken) {
+      throw new NotFound('No key token found with this userId.');
+    }
 
-const findByRefreshTokenUsed = async (refreshToken) => {
-  const keyToken = await KeyToken.findOne({ refreshTokenUsed: refreshToken });
-  if (!keyToken) {
-    throw new NotFound();
+    return keyToken;
   }
+}
 
-  return keyToken;
-};
-
-module.exports = {
-  createKeyToken,
-  findByUserId,
-  removeById,
-  findByRefreshTokenUsed,
-};
+module.exports = KeyTokenService;

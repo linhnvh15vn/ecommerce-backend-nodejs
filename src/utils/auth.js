@@ -3,8 +3,8 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
-const KeyTokenService = require('../services/key-token.service');
 const { BadRequest } = require('../core/error.response');
+const KeyTokenService = require('../services/key-token.service');
 
 const createTokenPair = async (payload, publicKey, privateKey) => {
   try {
@@ -42,12 +42,15 @@ const generateKeyTokens = async (payload) => {
   const { publicKey, privateKey } = generateRSAKeys();
 
   const tokens = await createTokenPair(payload, publicKey, privateKey);
+
   const keyStore = await KeyTokenService.createKeyToken({
-    userId: payload.userId,
     publicKey,
     privateKey,
     refreshToken: tokens.refreshToken,
+    ...payload,
   });
+
+  console.log('53' + keyStore); // null
 
   if (!keyStore) {
     throw new BadRequest();
@@ -56,13 +59,8 @@ const generateKeyTokens = async (payload) => {
   return tokens; // include AT & RT
 };
 
-const verifyJwt = async (token, keySecret) => {
-  return jwt.verify(token, keySecret);
-};
-
 module.exports = {
   createTokenPair,
   generateRSAKeys,
   generateKeyTokens,
-  verifyJwt,
 };
