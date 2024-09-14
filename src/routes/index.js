@@ -10,13 +10,6 @@ const { createApiKey } = require('../services/api-key.service');
 
 const router = express.Router();
 
-router.use(authMiddleware.checkApiKey);
-router.use(authMiddleware.checkPermission('0000'));
-
-router.use('/api/v1/auth', authRouter);
-router.use('/api/v1/products', productRouter);
-router.use('/api/v1/discounts', discountRouter);
-
 // TEST ROUTER
 /*
  *
@@ -26,8 +19,18 @@ router.use('/api/v1/discounts', discountRouter);
  */
 router.use('/api/test/api-key', async (req, res, next) => {
   return res.status(201).json({
-    data: await createApiKey(),
+    data: await createApiKey({
+      key: 'test-api-key',
+      permissions: ['0000'],
+    }),
   });
 });
+
+router.use(authMiddleware.checkApiKey);
+router.use(authMiddleware.checkPermission('0000'));
+
+router.use('/api/v1/auth', authRouter);
+router.use('/api/v1/products', productRouter);
+router.use('/api/v1/discounts', discountRouter);
 
 module.exports = router;

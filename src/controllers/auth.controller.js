@@ -16,12 +16,6 @@ class AuthController {
       data: await AuthService.logIn(req.body),
     }).send(res);
   });
-
-  logOut = catchAsync(async (req, res, next) => {
-    return new Ok({
-      data: await AuthService.logOut(req.keyStore),
-    }).send(res);
-  });
 }
 
 module.exports = new AuthController();
