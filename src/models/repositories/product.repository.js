@@ -5,48 +5,40 @@ const { ITEMS_PER_PAGE } = require('../../constants');
 const { Product } = require('../product.schema');
 
 class ProductRepository {
-  static async findAllProducts({
-    filter,
-    page = 1,
-    itemsPerPage = ITEMS_PER_PAGE,
-    select,
-  }) {
-    const skip = (page - 1) * itemsPerPage;
+  static async findAll({ filter, page = 1, select }) {
+    const skip = (page - 1) * ITEMS_PER_PAGE;
 
     const items = await Product.find(filter)
-      .populate('shop_id', '_id name email')
-      .sort({ createdAt: -1 })
+      .populate('shopId', '_id name email')
+      .sort({ createdAt: 'asc' })
       .skip(skip)
-      .limit(itemsPerPage)
+      .limit(ITEMS_PER_PAGE)
       .select(select && selectFields(select))
       .lean();
 
     const currentItemCount = items.length;
-    const totalItems = await Product.countDocuments(filter);
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const totalItems = await Product.countDocuments(filter).lean();
+    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
     return {
       currentItemCount,
-      itemsPerPage,
+      itemsPerPage: ITEMS_PER_PAGE,
       totalItems,
       totalPages,
       items,
     };
   }
 
-  static async findProductById({ productId, nonSelect }) {
+  static async findById({ productId, nonSelect }) {
     return await Product.findById(productId)
       .select(excludeFields(nonSelect))
       .lean();
   }
 
-  static async findOneAndUpdate({ productId, productShopId, body }) {
-    const query = { _id: productId, shop_id: productShopId };
-    const product = await Product.findOneAndUpdate(query, body, {
+  static async findOneAndUpdate(filter, body) {
+    const product = await Product.findOneAndUpdate(filter, body, {
       new: true,
-    });
-
-    if (product) return null;
+    }).lean();
 
     return product;
   }
@@ -54,7 +46,7 @@ class ProductRepository {
   static async searchProduct(q) {
     const regQ = new RegExp(q);
     const products = await Product.find({
-      is_published: true,
+      isPublished: true,
       $text: { $search: regQ },
     }).lean();
 

@@ -27,7 +27,7 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    shop_id: {
+    shopId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: 'User',
@@ -36,7 +36,7 @@ const productSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
       required: true,
     },
-    rating_average: {
+    ratingAverage: {
       type: Number,
       default: 4.5,
       min: [1, 'Rating must be above 1.0'],
@@ -47,13 +47,13 @@ const productSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
-    is_draft: {
+    isDraft: {
       type: Boolean,
       default: true,
       index: true,
       select: false,
     },
-    is_published: {
+    isPublished: {
       type: Boolean,
       default: false,
       index: true,
@@ -61,10 +61,7 @@ const productSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: {
-      createdAt: 'created_at',
-      updatedAt: 'updated_at',
-    },
+    timestamps: true,
   },
 );
 
@@ -95,17 +92,14 @@ const clothingSchema = new mongoose.Schema(
     material: {
       type: String,
     },
-    shop_id: {
+    shopId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: 'User',
     },
   },
   {
-    timestamps: {
-      createdAt: 'created_at',
-      updatedAt: 'updated_at',
-    },
+    timestamps: true,
   },
 );
 
@@ -124,17 +118,14 @@ const electronicSchema = new mongoose.Schema(
     color: {
       type: String,
     },
-    shop_id: {
+    shopId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: 'User',
     },
   },
   {
-    timestamps: {
-      createdAt: 'created_at',
-      updatedAt: 'updated_at',
-    },
+    timestamps: true,
   },
 );
 

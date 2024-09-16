@@ -50,8 +50,8 @@ class _Product {
 
 class _Clothing extends _Product {
   async createProduct() {
-    const { shop_id, attributes } = this.body;
-    const body = { shop_id, ...attributes };
+    const { shopId, attributes } = this.body;
+    const body = { shopId, ...attributes };
 
     const newClothing = await Clothing.create(body);
     if (!newClothing) throw new BadRequest();
@@ -86,8 +86,8 @@ class _Clothing extends _Product {
 
 class _Electronic extends _Product {
   async createProduct() {
-    const { shop_id, attributes } = this.body;
-    const body = { shop_id, ...attributes };
+    const { shopId, attributes } = this.body;
+    const body = { shopId, ...attributes };
 
     const newElectronic = await Electronic.create(body);
     if (!newElectronic) {

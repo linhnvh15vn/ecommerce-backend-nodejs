@@ -3,53 +3,52 @@
 const { Product } = require('../models/product.schema');
 const ProductFactory = require('../factories/product.factory');
 const ProductRepository = require('../models/repositories/product.repository');
-const { selectFields, excludeFields } = require('../utils');
+const { cleanQueryParams } = require('../utils');
 
 class ProductService {
-  static async findAllProducts({ query }) {
-    const filter = { ...query, is_published: true };
+  static async findAllProducts({ page, ...query }) {
+    const filter = { ...query, isPublished: true };
     const select = ['name', 'price', 'thumb'];
 
-    return await ProductRepository.findAllProducts({
+    return await ProductRepository.findAll({
       filter,
+      page,
       select,
     });
   }
 
+  static async findAllDraftProducts(shopId, { page, ...query }) {
+    const filter = { shopId, isDraft: true, ...query };
+    const products = await ProductRepository.findAll({
+      filter,
+      page,
+    });
+
+    return products;
+  }
+
+  static async findAllPublishedProducts(shopId, { page, ...query }) {
+    const filter = { shopId, isPublished: true, ...query };
+    const products = await ProductRepository.findAll({
+      filter,
+      page,
+    });
+
+    return products;
+  }
+
   static async findProductById(productId) {
     const nonSelect = [];
-    return await ProductRepository.findProductById({ productId, nonSelect });
-  }
-
-  static async findAllDraftProducts({ shopId, skip = 0, limit = 50 }) {
-    const query = { shop_id: shopId, is_draft: true };
-    const products = await ProductRepository.findAllProducts({
-      query,
-      skip,
-      limit,
-    });
-
-    return products;
-  }
-
-  static async findAllPublishedProducts({ shopId, skip = 0, limit = 50 }) {
-    const query = { shop_id: shopId, is_published: true };
-    const products = await ProductRepository.findAllProducts({
-      query,
-      skip,
-      limit,
-    });
-
-    return products;
+    return await ProductRepository.findById({ productId, nonSelect });
   }
 
   static async createProduct(body) {
-    const newProduct = await ProductFactory.createProduct(type, body);
+    const newProduct = await ProductFactory.createProduct(body.type, body);
     return newProduct;
   }
 
   static async updateProduct(body) {
-    const productType = (await Product.findById(body.product_id)).product_type;
+    const productType = (await Product.findById(body._id)).type;
     return await ProductFactory.updateProduct(productType, body);
   }
 
@@ -57,24 +56,18 @@ class ProductService {
     return await ProductRepository.searchProduct(q);
   }
 
-  static async publishProduct({ productId, productShopId }) {
-    const body = { is_draft: false, is_published: true };
+  static async publishProduct({ _id, shopId }) {
+    const filter = { _id, shopId };
+    const body = { isDraft: false, isPublished: true };
 
-    return await ProductRepository.findOneAndUpdate({
-      productId,
-      productShopId,
-      body,
-    });
+    return await ProductRepository.findOneAndUpdate(filter, body);
   }
 
-  static async unPublishProduct({ productId, productShopId }) {
-    const body = { is_draft: true, is_published: false };
+  static async unPublishProduct({ _id, shopId }) {
+    const filter = { _id, shopId };
+    const body = { isDraft: true, isPublished: false };
 
-    return await ProductRepository.findOneAndUpdate({
-      productId,
-      productShopId,
-      body,
-    });
+    return await ProductRepository.findOneAndUpdate(filter, body);
   }
 }
 
