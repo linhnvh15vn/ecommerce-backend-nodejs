@@ -4,7 +4,7 @@ const KeyToken = require('../key-token.schema');
 
 class KeyTokenRepository {
   static async findOne({ filter }) {
-    return await KeyToken.findOne({ filter }).lean();
+    return await KeyToken.findOne(filter).lean();
   }
 
   static async findOneAndUpdate(filter, body) {

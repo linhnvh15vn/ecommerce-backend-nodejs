@@ -7,18 +7,19 @@ const { authenticate } = require('../middlewares/auth.middleware');
 
 const productRouter = express.Router();
 
-productRouter.get('/search', ProductController.searchProduct);
 productRouter.get('/', ProductController.findAllProducts);
-// productRouter.get('/:productId', ProductController.findProductById);
+productRouter.get('/search', ProductController.searchProduct);
+// productRouter.get('/:_id', ProductController.findProductById);
 
 productRouter.use(authenticate);
 
-productRouter.post('/', ProductController.createProduct);
-productRouter.patch('/:productId', ProductController.updateProduct);
 productRouter.get('/drafts', ProductController.findAllDrafts);
 productRouter.get('/published', ProductController.findAllPublished);
 
-productRouter.post('/publish/:productId', ProductController.publishProduct);
-productRouter.post('/unpublish/:productId', ProductController.unPublishProduct);
+productRouter.post('/', ProductController.createProduct);
+
+productRouter.patch('/:_id', ProductController.updateProduct);
+productRouter.patch('/publish/:_id', ProductController.publishProduct);
+productRouter.patch('/unpublish/:_id', ProductController.unPublishProduct);
 
 module.exports = productRouter;
