@@ -1,16 +1,10 @@
 'use strict';
 
 const DiscountService = require('../services/discount.service');
-const { catchAsync } = require('../utils');
 const { Ok, Created } = require('../core/success.response');
+const { catchAsync } = require('../utils');
 
 class DiscountController {
-  testError = catchAsync(async (req, res, next) => {
-    return new Created({
-      data: DiscountService.testError(),
-    }).send(res);
-  });
-
   createDiscount = catchAsync(async (req, res, next) => {
     return new Created({
       data: await DiscountService.createDiscount({
@@ -22,7 +16,7 @@ class DiscountController {
 
   findAllShopDiscounts = catchAsync(async (req, res, next) => {
     return new Ok({
-      data: await DiscountService.findAllShopDiscounts(req.user.userId),
+      data: await DiscountService.findAllShopDiscounts(req.query.shopId),
     }).send(res);
   });
 
@@ -34,10 +28,13 @@ class DiscountController {
 
   findAllProductsWithDiscount = catchAsync(async (req, res, next) => {
     return new Ok({
-      data: await DiscountService.findAllProductsWithDiscount({
-        ...req.query,
-        // shopId: req.user.userId,
-      }),
+      data: await DiscountService.findAllProductsWithDiscount(req.query),
+    }).send(res);
+  });
+
+  deleteDiscount = catchAsync(async (req, res, next) => {
+    return new Ok({
+      data: await DiscountService.deleteDiscount(req.params._id),
     }).send(res);
   });
 }
