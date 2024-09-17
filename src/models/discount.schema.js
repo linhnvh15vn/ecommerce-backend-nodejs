@@ -15,7 +15,6 @@ const discountSchema = new mongoose.Schema(
     type: {
       type: String,
       enum: ['fixed', 'percentage'],
-      default: 'fixed',
     },
     value: {
       type: Number,
@@ -33,21 +32,21 @@ const discountSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    maxUse: {
+    maxUsage: {
       type: Number,
       required: true,
     },
-    useCount: {
+    usedCount: {
+      type: Number,
+      default: 0,
+    },
+    maxUsagePerUser: {
       type: Number,
       required: true,
     },
-    usedByUserIds: {
+    usedBy: {
       type: Array,
       default: [],
-    },
-    limit: {
-      type: Number,
-      required: true,
     },
     minOrderValue: {
       type: Number,
@@ -55,8 +54,8 @@ const discountSchema = new mongoose.Schema(
     },
     shopId: {
       type: mongoose.Types.ObjectId,
-      ref: 'User',
       required: true,
+      ref: 'User',
     },
     isActive: {
       type: Boolean,

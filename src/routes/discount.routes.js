@@ -6,17 +6,16 @@ const AuthMiddleware = require('../middlewares/auth.middleware');
 
 const discountRouter = express.Router();
 
-discountRouter.get('/test-error', DiscountController.testError);
-
-discountRouter.post('/amount', DiscountController.getDiscountAmount);
+discountRouter.get('/', DiscountController.findAllShopDiscounts);
 discountRouter.get(
-  '/list-products',
+  '/available-products',
   DiscountController.findAllProductsWithDiscount,
 );
+discountRouter.post('/get-amount', DiscountController.getDiscountAmount);
 
 discountRouter.use(AuthMiddleware.authenticate);
 
 discountRouter.post('/', DiscountController.createDiscount);
-discountRouter.get('/', DiscountController.findAllShopDiscounts);
+discountRouter.delete('/:_id', DiscountController.deleteDiscount);
 
 module.exports = discountRouter;
