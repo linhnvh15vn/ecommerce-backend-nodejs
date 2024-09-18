@@ -4,15 +4,15 @@ const { default: mongoose } = require('mongoose');
 
 const cartSchema = new mongoose.Schema(
   {
-    user_id: {
+    userId: {
       type: Number,
       required: true,
     },
-    products: {
+    items: {
       type: Array,
       required: true,
     },
-    item_count: {
+    itemCount: {
       type: Number,
     },
     status: {
@@ -22,10 +22,7 @@ const cartSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: {
-      createdAt: 'created_at',
-      updatedAt: 'updated_at',
-    },
+    timestamps: true,
   },
 );
 

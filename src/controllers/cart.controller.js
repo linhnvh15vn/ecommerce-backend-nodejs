@@ -5,9 +5,9 @@ const { Ok } = require('../core/success.response');
 const { catchAsync } = require('../utils');
 
 class CartController {
-  findUserCart = catchAsync(async (req, res, next) => {
+  findCartByUserId = catchAsync(async (req, res, next) => {
     return new Ok({
-      data: await CartService.findUserCart(req.query.userId),
+      data: await CartService.findCardByUserId(req.query.userId),
     }).send(res);
   });
 
@@ -17,15 +17,15 @@ class CartController {
     }).send(res);
   });
 
-  updateCartQuantity = catchAsync(async (req, res, next) => {
+  updateQuantity = catchAsync(async (req, res, next) => {
     return new Ok({
-      data: await CartService.updateCartQuantity(req.body),
+      data: await CartService.updateQuantity(req.body),
     }).send(res);
   });
 
-  removeProductFormCart = catchAsync(async (req, res, next) => {
+  removeItem = catchAsync(async (req, res, next) => {
     return new Ok({
-      data: await CartService.removeProductFromCart(req.body),
+      data: await CartService.removeItem(req.body),
     }).send(res);
   });
 }

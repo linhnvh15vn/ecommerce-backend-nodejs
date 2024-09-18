@@ -1,69 +1,76 @@
 'use strict';
 
+const { default: mongoose } = require('mongoose');
 const Cart = require('../cart.schema');
+const ProductRepository = require('./product.repository');
 
 class CartRepository {
-  static async findAllCarts({ filter }) {
-    return await Cart.find(filter);
+  static async find(filter) {
+    return await Cart.find(filter).lean();
   }
 
-  static async findOneCart({ filter }) {
+  static async findOne(filter) {
     return await Cart.findOne(filter).lean();
   }
 
-  static async createCart({ userId, product }) {
-    console.log(product);
+  static async create({ userId, product }) {
+    const foundProduct = await ProductRepository.findById({
+      productId: product._id,
+    });
 
     return await Cart.findOneAndUpdate(
       {
-        user_id: userId,
+        userId,
       },
       {
         $addToSet: {
-          products: product, // Add directly in products array
+          items: {
+            productId: foundProduct._id,
+            name: foundProduct.name,
+            price: foundProduct.price,
+            quantity: product.quantity,
+          },
         },
       },
       {
         new: true,
         upsert: true,
       },
-    );
+    ).lean();
   }
 
-  static async updateCartQuantity({ userId, product }) {
-    const { _id, quantity } = product;
-
+  static async updateQuantity({ userId, product }) {
     return await Cart.findOneAndUpdate(
       {
-        user_id: userId,
+        userId,
         status: 'active',
-        'products._id': _id,
+        'items.productId': product._id,
       },
       {
         $inc: {
-          'products.$.quantity': quantity,
+          'items.$.quantity': product.quantity,
         },
       },
       {
         new: true,
         upsert: true,
       },
-    );
+    ).lean();
   }
 
-  static async removeProductFromCart({ userId, productId }) {
+  static async removeItem({ userId, productId }) {
     return await Cart.findOneAndUpdate(
       {
-        user_id: userId,
+        userId,
       },
       {
         $pull: {
-          products: {
+          items: {
             productId,
           },
         },
       },
-    );
+    ).lean();
   }
 }
 
