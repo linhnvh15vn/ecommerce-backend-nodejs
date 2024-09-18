@@ -5,40 +5,44 @@ const { Created, Ok } = require('../core/success.response');
 const { catchAsync } = require('../utils');
 
 class ProductController {
+  findAllProducts = catchAsync(async (req, res, next) => {
+    return new Ok({
+      data: await ProductService.findAllProducts(req.query),
+    }).send(res);
+  });
+
   createProduct = catchAsync(async (req, res, next) => {
     return new Created({
-      data: await ProductService.createProduct(req.body.product_type, {
-        product_shop: req.user.userId,
+      data: await ProductService.createProduct({
+        shopId: req.user.userId,
         ...req.body,
       }),
     }).send(res);
   });
 
-  /* GET - Find all draft product - OK */
   findAllDrafts = catchAsync(async (req, res, next) => {
     return new Ok({
-      data: await ProductService.findAllDraftProducts({
-        product_shop: req.user.userId,
-      }),
+      data: await ProductService.findAllDraftProducts(
+        req.user.userId,
+        req.query,
+      ),
     }).send(res);
   });
 
-  /* GET - Find all published product - OK */
   findAllPublished = catchAsync(async (req, res, next) => {
-    console.log('a');
-
     return new Ok({
-      data: await ProductService.findAllPublishedProducts({
-        product_shop: req.user.userId,
-      }),
+      data: await ProductService.findAllPublishedProducts(
+        req.user.userId,
+        req.query,
+      ),
     }).send(res);
   });
 
   publishProduct = catchAsync(async (req, res, next) => {
     return new Ok({
       data: await ProductService.publishProduct({
-        product_shop: req.user.userId,
-        product_id: req.params.productId,
+        _id: req.params._id,
+        shopId: req.user.userId,
       }),
     }).send(res);
   });
@@ -46,42 +50,30 @@ class ProductController {
   unPublishProduct = catchAsync(async (req, res, next) => {
     return new Ok({
       data: await ProductService.unPublishProduct({
-        product_shop: req.user.userId,
-        product_id: req.params.productId,
+        _id: req.params._id,
+        shopId: req.user.userId,
       }),
     }).send(res);
   });
 
-  /* GET - Search product - OK */
   searchProduct = catchAsync(async (req, res, next) => {
     return new Ok({
       data: await ProductService.searchProduct(req.query.q),
     }).send(res);
   });
 
-  /* GET - Find all products - OK */
-  findAllProducts = catchAsync(async (req, res, next) => {
-    return new Ok({
-      data: await ProductService.findAllProducts({
-        query: req.query,
-      }),
-    }).send(res);
-  });
-
-  /* GET - Find product by productId - OK */
   findProductById = catchAsync(async (req, res, next) => {
     return new Ok({
-      data: await ProductService.findProductById(req.params.productId),
+      data: await ProductService.findProductById(req.params._id),
     }).send(res);
   });
 
-  /* PATCH - Update product */
   updateProduct = catchAsync(async (req, res, next) => {
     return new Ok({
       data: await ProductService.updateProduct({
         ...req.body,
-        product_id: req.params.productId,
-        product_shop: req.user.userId,
+        productId: req.params.productId,
+        shopId: req.user.userId,
       }),
     }).send(res);
   });
