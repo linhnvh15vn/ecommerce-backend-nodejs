@@ -69,6 +69,23 @@ class ProductService {
 
     return await ProductRepository.findOneAndUpdate(filter, body);
   }
+
+  static async checkProductByServer(products) {
+    return await Promise.all(
+      products.map(async (product) => {
+        const foundProduct = await ProductRepository.findById({
+          productId: product.productId,
+        });
+        if (foundProduct) {
+          return {
+            price: foundProduct.price,
+            quantity: product.quantity,
+            productId: foundProduct._id,
+          };
+        }
+      }),
+    );
+  }
 }
 
 module.exports = ProductService;

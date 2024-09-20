@@ -13,6 +13,10 @@ class CartRepository {
     return await Cart.findOne(filter).lean();
   }
 
+  static async findById(_id) {
+    return await Cart.findById(_id).lean();
+  }
+
   static async create({ userId, product }) {
     const foundProduct = await ProductRepository.findById({
       productId: product._id,

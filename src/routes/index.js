@@ -6,6 +6,7 @@ const authRouter = require('./auth.routes');
 const productRouter = require('./product.routes');
 const discountRouter = require('./discount.routes');
 const cartRouter = require('./cart.routes');
+const checkoutRouter = require('./checkout.routes');
 
 const authMiddleware = require('../middlewares/auth.middleware');
 
@@ -36,5 +37,6 @@ router.use('/api/v1/auth', authRouter);
 router.use('/api/v1/products', productRouter);
 router.use('/api/v1/discounts', discountRouter);
 router.use('/api/v1/cart', cartRouter);
+router.use('/api/v1/checkout', checkoutRouter);
 
 module.exports = router;
